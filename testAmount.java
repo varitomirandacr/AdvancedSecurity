@@ -4,8 +4,10 @@ public class testAmount{
     private int cents;    
     //@ spec_public
     private int euros;
-    
+   
     /*@ ensures this.euros == euros && this.cents == cents;
+      @ ensures euros >= Integer.MIN_VALUE && euros <= Integer.MAX_VALUE;
+      @ ensures cents >= Integer.MIN_VALUE && cents <= Integer.MAX_VALUE;
       @*/
     public testAmount(int euros, int cents){
       this.euros = euros;
@@ -40,7 +42,16 @@ public class testAmount{
         new_euros = new_euros + 1;
       }
       return new testAmount(new_euros, new_cents);
-     }
+    }
    
+    /*@ requires a != null;
+      @ ensures \result == true || \result == false;
+      @*/
+    public boolean equal(testAmount a) {
+      //@ assert euros >= Integer.MIN_VALUE;
+      //@ assert euros <= Integer.MAX_VALUE;
+      if (a==null) return false;
+      else return (euros == a.euros && cents == a.cents);
+    }
    }
    
