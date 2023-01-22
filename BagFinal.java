@@ -21,8 +21,6 @@
    OpenJML can - or cannot - prove at a given program point.
   
 */
-//https://stackoverflow.com/questions/65274277/jml-remove-warning-after-calling-a-function
-//https://stackoverflow.com/questions/65291445/why-openjml-can-not-prove-an-assertion-in-for-cycle
 
 /* https://www.openjml.org/documentation/JML_Reference_Manual.pdf - pag: 141 */
 /* code_java_math */ // Testeado pero no usado
