@@ -21,6 +21,8 @@
    OpenJML can - or cannot - prove at a given program point.
   
 */
+//https://stackoverflow.com/questions/65274277/jml-remove-warning-after-calling-a-function
+//https://stackoverflow.com/questions/65291445/why-openjml-can-not-prove-an-assertion-in-for-cycle
 
 /* https://www.openjml.org/documentation/JML_Reference_Manual.pdf - pag: 141 */
 /* code_java_math */ // Testeado pero no usado
@@ -31,22 +33,29 @@ class Bag {
     /*@ non_null @*/ int[] contents;     
     int n;
 
-    //@ invariant contents != null;
-    //@ invariant 0 <= n && n <= contents.length;
+    /*@ invariant contents != null;
+      @ invariant 0 <= n && n <= contents.length;
+      @*/
   
-    //@ requires input != null;
-    //@ requires input.length >= 0;
-    //@ ensures contents != null;
+    /*@ requires input != null && input.length >= 0;
+      @ ensures contents != null;
+      @*/
     Bag(int[] input) {
       n = input.length;
       contents = new int[n];
       arraycopy(input, 0, contents, 0, n);
-      //@ assert n >= 0;
     }
   
+    Bag() {
+      n = 0;
+      contents = new int[0];
+    }
+
     void removeOnce(int elt) {
-      //@ loop_invariant 0 <= i && i <= n && n >= 0 && n <= contents.length;
-      for (int i = 0; i < n; i++) {  // borrar <= a < unicamente para que produzca overflow
+      /*@ loop_invariant 0 <= i <= n && 0 <= n <= contents.length; @*/
+      // BUG FIX: de [i <= n] a [i < n;]
+      // Evitar un overflow en el array y hacerlo estricto
+      for (int i = 0; i < n; i++) {  
         if (contents[i] == elt ) {
            n--;
            contents[i] = contents[n];
@@ -56,12 +65,17 @@ class Bag {
     }
   
     void removeAll(int elt) {
-      //@ loop_invariant i>=0 && i<=n && n >= 0 && n <= contents.length;
-      for (int i = 0; i < n; i++) {  // borrar <= a < unicamente para que produzca overflow
+      /*@ loop_invariant i>=0 && i<=n && n >= 0 && n <= contents.length; @*/
+      // BUG FIX: de [i <= n] a [i < n;]
+      // Evitar un overflow en el array y hacerlo estricto
+      for (int i = 0; i < n; i++) {
         if (contents[i] == elt ) {
            n--;
            contents[i] = contents[n];
-           i--; // justificar este
+           // BUG FIX: i= i-1;
+           // Al reducir el tamanno del arreglo se tiene que reducir por fuerza
+           // el tamanno de los indices para poder remover el valor del arreglo
+           i= i-1;
         }
       }
     }
