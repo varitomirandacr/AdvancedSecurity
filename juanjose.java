@@ -72,7 +72,7 @@ class Amount{
       @ ensures !(\result.cents < 0 && \result.euros > 0);      
     @*/
     public /*@ non_null @*/ Amount negate(){      
-      return new Amount(-euros,-cents); //Inverted parameters
+      return new Amount(-euros,-cents); //parametros invertidos
     } 
    
     /*@ requires a != null;
