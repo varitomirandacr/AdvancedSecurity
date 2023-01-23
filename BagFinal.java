@@ -19,13 +19,9 @@
       assert
    to add additional assertions in source code, to find out what 
    OpenJML can - or cannot - prove at a given program point.
-  
-*/
-
-/* https://www.openjml.org/documentation/JML_Reference_Manual.pdf - pag: 141 */
-/* code_java_math */ // Testeado pero no usado
-/* code_safe_math */ // Testeado pero no usado
-/*@ code_bigint_math */ // Testeado y funciono
+   
+   https://www.openjml.org/documentation/JML_Reference_Manual.pdf - pag: 141
+*/ /*@ code_bigint_math */
 class Bag {
 
     /*@ non_null @*/ int[] contents;     
