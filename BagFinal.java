@@ -24,7 +24,10 @@
 */ /*@ code_bigint_math */
 class Bag {
 
-    /*@ non_null @*/ int[] contents;     
+   
+   
+    /*@ non_null @*/ 
+    int[] contents;     
     int n;
 
     /*@ invariant contents != null;
