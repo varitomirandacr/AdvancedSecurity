@@ -49,6 +49,8 @@ class Bag {
       contents = new int[0];
     }
 
+    /*@ requires elt >= 0;
+      @*/ 
     void removeOnce(int elt) {
       /*@ loop_invariant 0 <= i <= n && 0 <= n <= contents.length; @*/
       // BUG FIX: de [i <= n] a [i < n;]
@@ -62,6 +64,8 @@ class Bag {
       }
     }
   
+    /*@ requires elt >= 0;
+      @*/ 
     void removeAll(int elt) {
       /*@ loop_invariant i>=0 && i<=n && n >= 0 && n <= contents.length; @*/
       // BUG FIX: de [i <= n] a [i < n;]
@@ -78,7 +82,8 @@ class Bag {
       }
     }
 
-    /*@ ensures \result >= 0;
+    /*@ requires elt >= 0;
+      @ ensures 0 <= \result;
       @ pure 
       @*/ 
     int getCount(int elt) {
@@ -99,6 +104,9 @@ class Bag {
        feel free to stop.
      */
 
+    /*@ assignable \everything;
+      @ requires elt >= 0;
+      @*/
     void add(int elt) {
       if (n == contents.length) {
          // BUG FIX: de [2*n] a [2*n+1] 
@@ -116,7 +124,8 @@ class Bag {
       n++;
     }
 
-    /*@ requires b != null;
+    /*@ assignable this.contents;
+      @ requires b != null;
       @*/
     void add(Bag b) {
       int[] new_contents = new int[n + b.n];
@@ -138,20 +147,22 @@ class Bag {
       this.add(new Bag(a));
     }*/
     
-    /*
-    //@ requires b != null;
+    /*@ requires b != null; 
+      @ requires b.contents != null;
+      @*/
     Bag(Bag b) {
+      // BUG FIX: set [this.contents = new int[0]]
+      // Nunca se inicializa el array y se ocupa inicializar cuando se crea la clase
+      this.contents = new int[0];
       this.add(b); 
-    }*/
-
-    
+    }    
  
-    /*@ requires src != null;
+    /*@ assignable dest[*];
+      @ requires src != null;
       @ requires 0 <= length;
       @ requires 0 <= srcOff && (srcOff + length) <= src.length;
       @ requires 0 <= destOff && (destOff + length) <= dest.length;
       @ requires dest != null;
-      @ assignable dest[*];
       @ ensures dest != null && dest.length == \old(dest.length);
       @ ensures length == \old(length) ==> 0 <= length;
       @ ensures n == \old(n);
@@ -167,7 +178,7 @@ class Bag {
         @ loop_invariant 0 <= length;
         @ loop_invariant 0 <= i <=length; 
         @*/
-      for( int i=0 ; i<length; i++) {
+        for( int i=0 ; i<length; i++) {
          dest[destOff+i] = src[srcOff+i];
       }
     }
