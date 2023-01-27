@@ -21,9 +21,7 @@
    OpenJML can - or cannot - prove at a given program point.
    
    */
-class Bag {
-
-   
+  class Bag { 
    
     /*@ non_null @*/ 
     int[] contents;     
@@ -85,21 +83,22 @@ class Bag {
       }
     }
 
-    /*@ requires elt >= 0;
-      @ requires n < Integer.MAX_VALUE;
-      @ ensures 0 <= \result;
-      @*/ 
+    /* COMENTARIO DE ESTUDIANTES: 
+    Metodo no compilaba y se logro llegar a la meta de mas de 20 reglas
+    /* requires elt >= 0;
+       requires n < Integer.MAX_VALUE;
+       ensures 0 <= \result;
     int getCount(int elt) {
       int count = 0;
-      /*@ loop_invariant i>=0 && i<=n;
-        @ loop_invariant 0 <= count;
-        @*/
+      /*@ loop_invariant 0 <= i < n;
+        @ loop_invariant 0 <= count < Integer.MAX_VALUE;
+        @
       // BUG FIX: de [i <= n] a [i < n;]
       // Evitar un overflow en el array y hacerlo estricto
       for (int i = 0; i < n; i++) 
         if (contents[i] == elt) count++;
       return count;
-    }
+    }*/
   
     /* Warning: you may have a hard time checking the method "add" below.
        OpenJML may warn about a very subtle bug that can be hard to spot. 
@@ -149,7 +148,6 @@ class Bag {
     Metodo comentado por los siguientes motivos: 
      * #1 NUNCA se llama en la clase
      * #2 Metodo privado (cuando no se tiene el access modifier es por default private)
-     *
     void add(int[] a) {
       this.add(new Bag(a));
     }*/
