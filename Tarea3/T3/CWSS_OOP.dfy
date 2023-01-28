@@ -163,7 +163,7 @@ class Environmental extends FormulaBase {
         var block6 := (block5 * fbi);
         var block7 := (block6 * externalControlEffectiveness);
                 
-        environmental := block6 / twenty;
+        environmental := block7 / twenty;
 
         assert zero <= block1 <= ten;
         assert zero <= block2 <= three;

@@ -1,16 +1,32 @@
 
 
-const hundred := 100.0 as real;
-const twenty := 20.0 as real;
-const fifteen := 15.0 as real;
-const ten := 10.0 as real;
-const five := 5.0 as real;
-const four := 4.0 as real;
-const three := 3.0 as real;
-const zero := 0.0 as real;
-const one := 1.0 as real;
-const minimum := 0.01 as real;
+method Main() {
 
+    var baseFindig := funcBaseFinding(0.9, 1.0, 1.0, 1.0, 1.0);
+    print baseFindig;
+    print "\n";
+    var attackSurface := funcAttackSurface(0.9, 1.0, 1.0, 1.0, 0.9, 1.0);
+    print attackSurface;
+    print "\n";
+    var environmental := funcEnvironmental(0.9, 1.0, 1.0, 1.0, 1.0);
+    print environmental;
+    print "\n";
+
+    var base : real := baseFindig * attackSurface * environmental;
+    print base;
+}
+
+const hundred : real := 100.0;
+const twenty : real := 20.0;
+const fifteen : real := 15.0;
+const ten : real := 10.0;
+const five : real := 5.0;
+const four : real := 4.0;
+const three : real := 3.0;
+const zero : real := 0.0;
+const one : real := 1.0;
+const twenty_multiplier : real := 0.05;
+const minimum : real := 0.01;
 
 method funcImpact(impact:real) returns (result:real)
     requires zero <= impact && impact <= one
@@ -24,24 +40,6 @@ method funcImpact(impact:real) returns (result:real)
     assert impact != zero ==> result == one;
 }
 
-// AFTER THIS POINT MAIN METHOD AND FUNCTIONS AS WELL
-
-method Main() {
-
-    var baseFindig := funcBaseFinding(0.9, 1.0, 1.0, 1.0, 1.0);
-    print baseFindig;
-    print "\n";
-    var attackSurface := funcAttackSurface(0.9, 1.0, 1.0, 1.0, 0.9, 1.0);
-    print attackSurface;
-    print "\n";
-    var environmental := funcEnvironmental(1.0, 1.0, 1.0, 1.0, 1.0);
-    print environmental;
-    print "\n";
-
-    var base : real := baseFindig * attackSurface * environmental;
-    print base;
-}
-
 method funcBaseFinding(ti:real, ap:real, al:real, ic:real, fc:real) returns (baseFinding:real)
     requires zero <= ti <= one
     requires zero <= ap <= one
@@ -53,22 +51,14 @@ method funcBaseFinding(ti:real, ap:real, al:real, ic:real, fc:real) returns (bas
     var fti := funcImpact(ti);
     assert zero <= fti <= one;
     
-    var block1 := (ten * ti);
-    var block2 := (five * (ap + al));
-    var block3 := (five * fc);
-    var block4 := (block1 + block2);
-    var block5 := (block4 + block3);
-    var block6 := (block5 * fti);
-    var block7 := (block6 * ic);
-    baseFinding := block5 * four;
-
-    assert zero <= block1 <= hundred;
-    assert zero <= block2 <= hundred;
-    assert zero <= block3 <= hundred;
-    assert zero <= block4 <= hundred;
-    assert zero <= block5 <= hundred;
-    assert zero <= block6 <= hundred;
-    assert zero <= baseFinding <= hundred;
+    baseFinding := zero;
+    if (fti * ic > zero) {     
+        baseFinding := (((ten*ti) + (five*(ap+al)) + (five*fc)) * ic) * four;
+        
+        if baseFinding < zero { baseFinding:= zero; } 
+        else if baseFinding > hundred { baseFinding := hundred; }
+        else { baseFinding := baseFinding; }
+    }
 }
 
 method funcAttackSurface(rp:real, rl:real, av:real, asn:real, lin:real, sc:real) returns (attackSurface:real) 
@@ -93,46 +83,23 @@ method funcAttackSurface(rp:real, rl:real, av:real, asn:real, lin:real, sc:real)
 } 
 
 method funcEnvironmental(bi:real, di:real, ex:real, ec:real, p:real) returns (environmental:real) 
-    requires bi >= zero && bi <= one
-    requires di >= zero && di <= one
-    requires ex >= zero && ex <= one
+    requires zero <= bi <= one
+    requires zero <= di <= one
+    requires zero <= ex <= one
     requires zero <= ec <= one
     requires zero <= p <= one
     ensures zero <= environmental <= one
 {
     var fbi := funcImpact(bi);
-    assert zero <= fbi <= one;
-/*
-    assert (ten * bi) <= ten;
-    assert (three * di) <= ten;
-    assert (four * ex) <= four;
-    assert (three * p) <= three;
-    assert zero <= ((ten * bi) + (three * di) + (four * ex) + (three * p)) <= twenty;
-    assert zero <= (((ten * bi) + (three * di) + (four * ex) + (three * p)) * fbi) <= twenty;
-    //assert zero <= ((ten * bi) + (three * di) + (four * ex) + (three * p) * fbi) * ec <= twenty;
-    //assert zero <= ((ten * bi) + (three * di) + (four * ex) + (three * p) * fbi * ec) * 0.05 <= one;
-    environmental:= bi*ten + di*three + ex*four + p*three * fbi * ec * 0.05;
-    assert environmental <= twenty;*/
+    var result := (ten*bi) + (three*di) + (four*ex) + (three*p);
 
-    var block1 := (ten * bi);
-    var block2 := (three * di);
-    var block3 := (four * ex);
-    var block4 := (three * p);
-
-    var block5 := (block1 + block2 + block3 + block4);
-    var block6 := (block5 * fbi);
-    var block7 := (block6 * ec);
-            
-    environmental := block6 *0.05;
-
-    assert zero <= block1 <= ten;
-    assert zero <= block2 <= three;
-    assert zero <= block3 <= four;
-    assert zero <= block4 <= three;
-    assert zero == block6 || (block6 * fbi) == block6;
-    assert block5 == zero || block5 == block5;
-    assert zero <= environmental <= one;
-    assert zero <= environmental && environmental <= one;
+    if (fbi * ec == zero) { environmental := zero; }
+    else if (fbi * ec == one) { environmental := result * twenty_multiplier; }
+    else if fbi == one { environmental := (result * ec) * twenty_multiplier; }
+    
+    if environmental < zero { environmental:= zero; } 
+    else if environmental > one { environmental := one; }
+    else { environmental := environmental; }    
 } 
 
 method funcTotal(finding:real, surface:real, env:real) returns (cwss:real)
