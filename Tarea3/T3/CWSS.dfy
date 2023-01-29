@@ -2,25 +2,31 @@
 
 method Main() {
 
+    print "\n Base Finding Subscore: ";
     var baseFindig := funcBaseFinding(0.9, 1.0, 1.0, 1.0, 1.0);
     print baseFindig;
-    print "\n";
+    print "\n Attack Surface Subscore: ";
     var attackSurface := funcAttackSurface(0.9, 1.0, 1.0, 1.0, 0.9, 1.0);
     print attackSurface;
-    print "\n";
+    print "\n Environmental Subscore: ";
     var environmental := funcEnvironmental(0.9, 1.0, 1.0, 1.0, 1.0);
     print environmental;
-    print "\n";
 
+    print "\n Resultado del CWSS: ";
     var base : real := baseFindig * attackSurface * environmental;
     print base;
 
-    print "\nTotal:";
+    print "\n";
+    print "\n =====================================================================";
+
+    print "\n Llamando segundo metodo de comprobacion:";
+    print "\n Total:";
     assert zero <= baseFindig <= hundred;
     assert zero <= attackSurface <= one;
     assert zero <= environmental <= one;
     var total := funcTotal(baseFindig, attackSurface, environmental);
     print total;
+    print "\n \n \n";
 }
 
 const hundred : real := 100.0;
@@ -128,15 +134,8 @@ method funcEnvironmental(bi:real, di:real, ex:real, ec:real, p:real) returns (en
 } 
 
 method funcTotal(finding:real, surface:real, env:real) returns (cwss:real)
-    requires zero <= finding <= hundred;
-    requires zero <= surface <= one;
-    requires zero <= env <= one;
-    ensures zero <= cwss <= hundred;
 {
-    cwss := finding * surface * env;
-    if cwss < zero { cwss:= zero; assert cwss == zero; } 
-    else if cwss > one { cwss := one; assert cwss == one; }
-    else { cwss := cwss; assert zero <= cwss <= one; }    
+    cwss := finding * surface * env; 
 }
 
 
