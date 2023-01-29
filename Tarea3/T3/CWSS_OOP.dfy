@@ -1,21 +1,28 @@
 trait FormulaBase {
-    const hundred := 100 as real;
-    const twenty := 20 as real;
-    const fifteen := 15 as real;
-    const ten := 10 as real;
-    const five := 5 as real;
-    const four := 4 as real;
-    const three := 3 as real;
-    const zero := 0 as real;
-    const one := 1 as real;
+    const hundred : real := 100.0;
+    const ninetyfive : real := 95.0;
+    const eigthy : real := 80.0;
+    const sixty : real := 60.0;
+    const fourty : real := 40.0;
+    const twenty : real := 20.0;
+    const fifteen : real := 15.0;
+    const ten : real := 10.0;
+    const five : real := 5.0;
+    const four : real := 4.0;
+    const three : real := 3.0;
+    const zero : real := 0.0;
+    const one : real := 1.0;
+    const twenty_multiplier : real := 0.05;
+    const minimum : real := 0.01;
 
     method funcImpact(impact:real) returns (result:real)
-        requires zero <= impact && impact <= one
-        ensures impact == zero ==> result == zero
-        ensures impact != zero ==> result == one
-        ensures result >= zero && result <= one
+    requires zero == impact || zero < impact <= one
+    requires one == impact || zero <= impact < one
+    ensures impact == zero ==> result == zero
+    ensures impact != zero ==> result == one
+    ensures zero == result || one == result
     {
-        assert zero <= impact && impact <= one;
+        assert zero == impact || zero < impact <= one;
         if impact == zero { result:= zero; } else { result:= one; }
         assert impact == zero ==> result == zero;
         assert impact != zero ==> result == one;
@@ -52,24 +59,16 @@ class BaseFinding extends FormulaBase {
         ensures zero <= baseFinding <= hundred
     {
         var fti := funcImpact(technicalImpact);
-        assert zero <= fti <= one;
+        var formulaBase := ((ten*technicalImpact) + (five*(acquiredProvilege+acquiredProvilegeLayer)) + (five*findingConfidence));
         
-        var block1 := (ten * technicalImpact);
-        var block2 := (five * (acquiredProvilege + acquiredProvilegeLayer));
-        var block3 := (five * findingConfidence);
-        var block4 := (block1 + block2);
-        var block5 := (block4 + block3);
-        var block6 := (block5 * fti);
-        var block7 := (block6 * internalControlEffectiveness);
-        baseFinding := block5 * four;
+        assert zero <= fti <= one;
+        if (fti * internalControlEffectiveness == zero) { baseFinding := zero; }
+        else if (fti * internalControlEffectiveness == one) { baseFinding := formulaBase * four; }
+        else if ( fti == one && zero < internalControlEffectiveness <= one ) { baseFinding := (formulaBase * internalControlEffectiveness) * four; }
 
-        assert zero <= block1 <= hundred;
-        assert zero <= block2 <= hundred;
-        assert zero <= block3 <= hundred;
-        assert zero <= block4 <= hundred;
-        assert zero <= block5 <= hundred;
-        assert zero <= block6 <= hundred;
-        assert zero <= baseFinding <= hundred;
+        if baseFinding < zero { baseFinding:= zero; } 
+        else if baseFinding > hundred { baseFinding := hundred; }
+        else { baseFinding := baseFinding; }   
     }
 }
 
@@ -106,16 +105,24 @@ class AttackSurface extends FormulaBase {
         requires zero <= authenticationStrenght <= one
         ensures zero <= attackSurface <= one
     {        
-        var block1 := (requiredPrivilege + requiredPrivilegeLayer + accessVector);
-        var block2 := (twenty * block1);
-        var block3 := (twenty * deploymentScope);
-        var block4 := (fifteen * levelOfInteraction);
-        var block5 := (five * authenticationStrenght);
-        var block6 := (block2 + block3);
-        var block7 := (block6 + block4);
-        var block8 := (block7 + block5);
-        attackSurface := (block8 / hundred);
-        assert zero <= attackSurface <= one ==> (attackSurface / hundred) <= one;   
+        var accumulator := (twenty*requiredPrivilege);
+        assert zero <= accumulator <= twenty;
+        accumulator := accumulator + (twenty*requiredPrivilegeLayer);
+        assert zero <= accumulator <= fourty;
+        accumulator := accumulator + (twenty*accessVector);
+        assert zero <= accumulator <= sixty;
+        accumulator := accumulator + (twenty*deploymentScope);
+        assert zero <= accumulator <= eigthy;
+        accumulator := accumulator + (fifteen*levelOfInteraction);
+        assert zero <= accumulator <= ninetyfive;
+        accumulator := accumulator + (five*authenticationStrenght);  
+        assert zero <= accumulator <= hundred;  
+        attackSurface := accumulator * minimum; 
+        assert zero <= attackSurface <= one;  
+
+        if attackSurface < zero { attackSurface:= zero; assert accumulator == zero; }
+        else if attackSurface > one { attackSurface := one; assert accumulator == one; }
+        else { attackSurface := attackSurface; assert zero <= attackSurface <= one; }
     } 
 }
 
@@ -149,29 +156,20 @@ class Environmental extends FormulaBase {
         ensures zero <= environmental <= one
     {        
         var fbi := funcImpact(businessImpact);
-        assert zero <= fbi <= one;
+        assert businessImpact == zero ==> businessImpact == zero;
+        assert zero == fbi || one == fbi;
+        var formulaBase := (ten*businessImpact) + (three*likelihoodOfDiscovery) + (four*likelihoodOfExploit) + (three*prevalence);
+        assert zero <= formulaBase <= twenty;
 
-        /*var result:= ((ten*businessImpact + three*likelihoodOfDiscovery + four*likelihoodOfExploit + three*prevalence) * fbi * externalControlEffectiveness);
-        environmental := result / twenty;*/
-
-        var block1 := (ten * businessImpact);
-        var block2 := (three * likelihoodOfDiscovery);
-        var block3 := (four * likelihoodOfExploit);
-        var block4 := (three * prevalence);
-
-        var block5 := (block1 + block2 + block3 + block4);
-        var block6 := (block5 * fbi);
-        var block7 := (block6 * externalControlEffectiveness);
-                
-        environmental := block7 / twenty;
-
-        assert zero <= block1 <= ten;
-        assert zero <= block2 <= three;
-        assert zero <= block3 <= four;
-        assert zero <= block4 <= three;
-        assert zero == block6 || (block6 * fbi) == block6;
-        assert block5 == zero || block5 == block5;
-        assert zero <= environmental <= one;
+        environmental := formulaBase;
+        if (zero < fbi < one) { environmental := environmental * fbi; }
+        if (zero < externalControlEffectiveness < one) { environmental := environmental * externalControlEffectiveness; }
+        if (fbi * externalControlEffectiveness == zero) { environmental := zero; }
+        else { environmental := environmental * twenty_multiplier; }
+        
+        if environmental < zero { environmental:= zero; assert environmental == zero; } 
+        else if environmental > one { environmental := one; assert environmental == one; }
+        else { environmental := environmental; assert zero <= environmental <= one; }   
     } 
 }
 
@@ -235,16 +233,25 @@ class CWSS extends FormulaBase {
         requires zero <= p <= one
         ensures zero <= cwss <= hundred
     {
+        print "\n Base Finding Subscore: ";
         var bf := CalculateBaseFinding(ti, ap, al, ic, fc);
         assert zero <= bf <= hundred;
+
+        print "\n Attack Surface Subscore: ";
         var asf := CalculateAttackSurface(rp, rl, av, asn, lin, sc);
         assert zero <= asf <= one;
+
+        print "\n Environmental Subscore: ";
         var env :=  CalculateEnvironmental(bi, di, ex, ec, p);
         assert zero <= env <= one;
+
+        print "\n Resultado del CWSS: ";
         cwss := bf * asf * env;
         if cwss < zero { cwss := zero; } else if cwss > hundred { cwss := hundred; } 
         else { cwss := cwss; }        
         assert zero <= cwss <= hundred; 
+        print "\n";
+        print "\n =====================================================================";
     }
 }
 
